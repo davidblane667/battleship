@@ -1,47 +1,49 @@
+import config from '../nuxt.config.js'
+
 export const state = () => ({
     game: {}
-})
+});
 
 export const mutations = {
     setData(state, data) {
         state.game = data
     }
-}
+};
 
 export const actions = {
     async gameStart({commit}) {
-        const gameData = await this.$axios.$post('http://battleships.dev.sibirix.ru/api/start/');
+        const gameData = await this.$axios.$post(`${config.baseURL}/api/start/`);
         commit('setData', gameData)
     },
     async fetch({commit}, options) {
-        const data = await this.$axios.$get(`http://battleships.dev.sibirix.ru/api/status/${options.id}/${options.code}`);
+        const data = await this.$axios.$get(`${config.baseURL}/api/status/${options.id}/${options.code}`);
         commit('setData', data)
     },
-}
+};
 
 export const getters = {
     game: s => s.game,
     isFullPlaces: state => {
-        let isFull = true
-        if (state.game.usedPlaces.length === 10) {
+        let isFull = true;
+        if (state.game.usedPlaces && state.game.usedPlaces.length === 10) {
             isFull = false
         }
         return isFull
     },
     expandAllData: state => () => {
-        const localData = []
-        const sData = state.game.fieldMy
+        const localData = [];
+        const sData = state.game.fieldMy;
 
         for (let i = 0; i < sData.length; i++) {
             for (let j = 0; j < sData[i].length; j++) {
-                const length = sData[i][j][0].slice(0, 1)
+                const length = sData[i][j][0].slice(0, 1);
                 let closed = false;
 
                 localData.forEach(el => {
                     if (el.shipId === sData[i][j][0]) {
                         if (el.x === i) {
                             el.orientation = 'vertical'
-                        } else el.orientation = 'horizontal'
+                        } else el.orientation = 'horizontal';
                         closed = true;
                     }
                 });
@@ -66,5 +68,4 @@ export const getters = {
     getStatusGame: state => () => {
         return state.game.game.status
     }
-}
-//http://battleships.dev.sibirix.ru/
+};

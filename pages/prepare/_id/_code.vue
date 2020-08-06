@@ -51,8 +51,8 @@
 
 <script>
     import Ship from '@/components/Ship'
-    import Battleground from '@/components/battleground/Battleground'
-    import axios from 'axios'
+    import Battleground from '@/components/battleground/index'
+    import config from '../../../nuxt.config.js'
 
 
     export default {
@@ -74,7 +74,8 @@
                 isFullField: true,
                 localData: [],
                 isReady: false,
-                lock: false
+                lock: false,
+                timerId: null
             }
         },
         mounted() {
@@ -118,34 +119,55 @@
                 this.clearField()
             },
             setRandomShips() {
-                this.clearField();
+                if (this.timerId !== null) {
+                    clearTimeout(this.timerId)
+                    this.timerId = null
+                } else {
+                    this.timerId = setTimeout(() => {
+                        this.clearField();
 
-                this.shipX = Math.floor(Math.random() * 10);
-                this.shipY = Math.floor(Math.random() * 10);
+                        this.shipX = Math.floor(Math.random() * 10);
+                        this.shipY = Math.floor(Math.random() * 10);
 
-                for (let i = 1; i <= 4; i++) {
-                    this.shipLength = 1;
-                    this.shipId = 'ship' + this.shipLength + '-' + i;
-                    this.handleDrop({x: this.shipX, y: this.shipY, shipLength: this.shipLength, id: this.shipId})
-                }
-                for (let i = 1; i <= 3; i++) {
-                    this.shipLength = 2;
-                    this.shipId = 'ship' + this.shipLength + '-' + i;
-                    this.handleDrop({x: this.shipX, y: this.shipY, shipLength: this.shipLength, id: this.shipId})
-                }
-                for (let i = 1; i <= 2; i++) {
-                    this.shipLength = 3;
-                    this.shipId = 'ship' + this.shipLength + '-' + i;
-                    this.handleDrop({x: this.shipX, y: this.shipY, shipLength: this.shipLength, id: this.shipId})
-                }
-                for (let i = 1; i <= 1; i++) {
-                    this.shipLength = 4;
-                    this.shipId = 'ship' + this.shipLength + '-' + i;
-                    this.handleDrop({x: this.shipX, y: this.shipY, shipLength: this.shipLength, id: this.shipId})
-                }
+                        for (let i = 1; i <= 4; i++) {
+                            this.shipLength = 1;
+                            this.shipId = 'ship' + this.shipLength + '-' + i;
+                            this.handleDrop({
+                                x: this.shipX,
+                                y: this.shipY,
+                                shipLength: this.shipLength,
+                                id: this.shipId
+                            })
+                        }
+                        for (let i = 1; i <= 3; i++) {
+                            this.shipLength = 2;
+                            this.shipId = 'ship' + this.shipLength + '-' + i;
+                            this.handleDrop({
+                                x: this.shipX,
+                                y: this.shipY,
+                                shipLength: this.shipLength,
+                                id: this.shipId
+                            })
+                        }
+                        for (let i = 1; i <= 2; i++) {
+                            this.shipLength = 3;
+                            this.shipId = 'ship' + this.shipLength + '-' + i;
+                            this.handleDrop({
+                                x: this.shipX,
+                                y: this.shipY,
+                                shipLength: this.shipLength,
+                                id: this.shipId
+                            })
+                        }
 
-                const shipsData = this.$store.getters.compilationAllData();
-                this.placeShip(shipsData)
+                        this.shipLength = 4;
+                        this.shipId = 'ship' + this.shipLength + '-' + 1;
+                        this.handleDrop({x: this.shipX, y: this.shipY, shipLength: this.shipLength, id: this.shipId})
+
+                        const shipsData = this.$store.getters.compilationAllData();
+                        this.placeShip(shipsData)
+                    }, 250)
+                }
             },
             async placeShip(ship) {
                 const {id, code} = this.$route.params;
@@ -159,7 +181,7 @@
 
                 const {data: {success}} = await this.$axios({
                     method: 'post',
-                    url: `http://battleships.dev.sibirix.ru/api/place-ship/${id}/${code}`,
+                    url: `${config.baseURL}/api/place-ship/${id}/${code}`,
                     data: str,
                     headers: {'Content-Type': 'multipart/form-data'}
                 });
@@ -171,7 +193,7 @@
             async clearField() {
                 const {id, code} = this.$route.params;
 
-                const {success} = await this.$axios.$post(`http://battleships.dev.sibirix.ru/api/clear-field/${id}/${code}`);
+                const {success} = await this.$axios.$post(`${config.baseURL}/api/clear-field/${id}/${code}`);
                 if (success) {
                     await this.$store.dispatch('server/fetch', {id: id, code: code})
                 }
@@ -256,41 +278,45 @@
 
                 const shipElem = document.getElementById(`${options.id}`);
 
-                if (this.shipOrientation) {
-                    shipElem.style.transform = 'rotateZ(180deg) rotateX(180deg)';
+                shipElem.style.transform = '';
 
-                    if (options.id === 'ship4-1') {
-                        shipElem.style.top = cordY - 30 + 'px';
-                        shipElem.style.left = cordX - 450 + 'px'
-                    } else if (this.shipLength === 3) {
-                        shipElem.style.top = cordY - 6 + 'px';
-                        shipElem.style.left = cordX - 410 + 'px'
-                    } else if (this.shipLength === 2) {
-                        shipElem.style.top = cordY - 5 + 'px';
-                        shipElem.style.left = cordX - 380 + 'px'
-                    } else {
-                        shipElem.style.transform = '';
-                        shipElem.style.top = cordY + 'px';
-                        shipElem.style.left = cordX - 350 + 'px'
-                    }
+                if (options.id === 'ship4-1') {
+                    shipElem.style.top = cordY - 30 + 'px'
+                } else if (this.shipLength === 3) {
+                    shipElem.style.top = cordY - 6 + 'px';
+                    shipElem.style.left = cordX - 400 + 'px'
+                } else if (this.shipLength === 2) {
+                    shipElem.style.top = cordY - 4 + 'px';
+                    shipElem.style.left = cordX - 350 + 'px'
+                } else {
+                    shipElem.style.top = cordY + 'px'
+                }
+                shipElem.style.left = cordX - 350 + 'px'
+            },
+            setShipImgVertical(options) {
+                const cordX = document.getElementById(`${options.x}${options.y}`).getBoundingClientRect().left;
+                const cordY = document.getElementById(`${options.x}${options.y}`).getBoundingClientRect().top;
 
+                const shipElem = document.getElementById(`${options.id}`);
+
+
+                shipElem.style.transform = 'rotateZ(180deg) rotateX(180deg)';
+
+                if (options.id === 'ship4-1') {
+                    shipElem.style.top = cordY - 30 + 'px';
+                    shipElem.style.left = cordX - 450 + 'px'
+                } else if (this.shipLength === 3) {
+                    shipElem.style.top = cordY - 6 + 'px';
+                    shipElem.style.left = cordX - 410 + 'px'
+                } else if (this.shipLength === 2) {
+                    shipElem.style.top = cordY - 5 + 'px';
+                    shipElem.style.left = cordX - 380 + 'px'
                 } else {
                     shipElem.style.transform = '';
-
-                    if (options.id === 'ship4-1') {
-                        shipElem.style.top = cordY - 30 + 'px'
-                    } else if (this.shipLength === 3) {
-                        shipElem.style.top = cordY - 6 + 'px';
-                        shipElem.style.left = cordX - 400 + 'px'
-                    } else if (this.shipLength === 2) {
-                        shipElem.style.top = cordY - 4 + 'px';
-                        shipElem.style.left = cordX - 350 + 'px'
-                    } else {
-                        shipElem.style.top = cordY + 'px'
-                    }
+                    shipElem.style.top = cordY + 'px';
                     shipElem.style.left = cordX - 350 + 'px'
-
                 }
+
             },
             setShip(options) {
                 const x = options.x;
@@ -364,16 +390,12 @@
                     y = Math.floor(Math.random() * 10);
 
                     if (options.shipLength === 2 && y > 8) {
-                        this.removeShip(options.id);
                         this.isClosedCell({x: x, y: y - 1, shipLength: length, id: options.id})
                     } else if (options.shipLength === 3 && y > 7) {
-                        this.removeShip(options.id);
                         this.isClosedCell({x: x, y: y - 2, shipLength: length, id: options.id})
                     } else if (options.shipLength === 4 && y > 6) {
-                        this.removeShip(options.id);
                         this.isClosedCell({x: x, y: y - 3, shipLength: length, id: options.id})
                     } else {
-                        this.removeShip(options.id);
                         this.isClosedCell({x: x, y: y, shipLength: length, id: options.id})
                     }
                     isClosed = false
@@ -405,28 +427,24 @@
                     y = Math.floor(Math.random() * 10);
 
                     if (options.shipLength === 2 && x > 8) {
-                        this.removeShip(options.id);
                         this.isClosedCellVertical({x: x - 1, y: y, shipLength: options.shipLength, id: options.id})
                     } else if (options.shipLength === 3 && x > 7) {
-                        this.removeShip(options.id);
                         this.isClosedCellVertical({x: x - 2, y: y, shipLength: options.shipLength, id: options.id})
                     } else if (options.shipLength === 4 && x > 6) {
-                        this.removeShip(options.id);
                         this.isClosedCellVertical({x: x - 3, y: y, shipLength: options.shipLength, id: options.id})
                     } else {
-                        this.removeShip(options.id);
                         this.isClosedCellVertical({x: x, y: y, shipLength: options.shipLength, id: options.id})
                     }
                     isClosed = false
                 } else {
-                    this.setShipImg({x: x, y: y, id: options.id});
+                    this.setShipImgVertical({x: x, y: y, id: options.id});
                     this.setShipVertical({x: x, y: y, shipLength: length, id: options.id});
                     isClosed = false;
                 }
             },
             async setStatusReady() {
                 const {id, code} = this.$route.params;
-                const response = await this.$axios.$post(`http://battleships.dev.sibirix.ru/api/ready/${id}/${code}`);
+                const response = await this.$axios.$post(`${config.baseURL}/api/ready/${id}/${code}`);
 
                 if (response.enemyReady && response.success) {
 
@@ -437,7 +455,7 @@
                     document.querySelector('.btn-wait').style.display = 'block';
 
                     setInterval(() => {
-                        this.$axios.$get(`http://battleships.dev.sibirix.ru/api/status/${id}/${code}`)
+                        this.$axios.$get(`${config.baseURL}/api/status/${id}/${code}`)
                             .then(data => {
                                 if (data.game.status === '2') {
                                     this.$router.push(`/battle/${id}/${code}`)

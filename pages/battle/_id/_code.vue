@@ -6,16 +6,16 @@
             <div class="ship ship4" id="ship4-1"></div>
 
             <div class="ship ship3" id="ship3-1"></div>
-            <div class="ship ship3 ship32" id="ship3-2"></div>
+            <div class="ship ship3" id="ship3-2"></div>
 
             <div class="ship ship2" id="ship2-1"></div>
-            <div class="ship ship2 ship22" id="ship2-2"></div>
-            <div class="ship ship2 ship23" id="ship2-3"></div>
+            <div class="ship ship2" id="ship2-2"></div>
+            <div class="ship ship2" id="ship2-3"></div>
 
             <div class="ship ship1" id="ship1-1"></div>
-            <div class="ship ship1 ship12" id="ship1-2"></div>
-            <div class="ship ship1 ship13" id="ship1-3"></div>
-            <div class="ship ship1 ship14" id="ship1-4"></div>
+            <div class="ship ship1" id="ship1-2"></div>
+            <div class="ship ship1" id="ship1-3"></div>
+            <div class="ship ship1" id="ship1-4"></div>
 
             <Battleground :myField="true"/>
         </div>
@@ -32,19 +32,19 @@
 
 <script>
     import Ship from '@/components/Ship'
-    import Battleground from '@/components/battleground/Battleground'
+    import Battleground from '@/components/battleground/index'
     import Statistic from '@/components/Statistic'
     import Chat from '@/components/Chat'
 
     export default {
+        async fetch({store, params}) {
+            await store.dispatch('server/fetch', {id: params.id, code: params.code});
+        },
         components: {
             Ship,
             Battleground,
             Statistic,
             Chat
-        },
-        async fetch({store, params}) {
-            await store.dispatch('server/fetch', {id: params.id, code: params.code});
         },
         data() {
             return {

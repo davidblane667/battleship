@@ -68,10 +68,10 @@
         },
         mounted() {
             setInterval(() => {
-                this.destroyedShip()
-                const status = this.$store.getters['server/getStatusGame']()
+                this.destroyedShip();
+                const status = this.$store.getters['server/getStatusGame']();
                 if (status === '3' && this.isMy) {
-                    const score = this.destroyScore
+                    const score = this.destroyScore;
                     if (score !== '100%') {
                         alert(`Вы победили!`)
                     } else {
@@ -87,67 +87,67 @@
         },
         methods: {
             destroyedShip() {
-                let data
+                let data;
                 if (this.isMy) {
                     data = this.$store.getters['server/getDestroyedShipsMy']()
                 } else {
                     data = this.$store.getters['server/getDestroyedShipsEnemy']()
                 }
-                this.score = 0
-                this.ship41 = []
-                this.ship31 = []
-                this.ship32 = []
-                this.ship21 = []
-                this.ship22 = []
-                this.ship23 = []
-                this.ship11 = []
-                this.ship12 = []
-                this.ship13 = []
-                this.ship14 = []
+                this.score = 0;
+                this.ship41 = [];
+                this.ship31 = [];
+                this.ship32 = [];
+                this.ship21 = [];
+                this.ship22 = [];
+                this.ship23 = [];
+                this.ship11 = [];
+                this.ship12 = [];
+                this.ship13 = [];
+                this.ship14 = [];
 
                 for (let i = 0; i < data.length; i++) {
                     for (let j = 0; j < data[i].length; j++) {
                         if (data[i][j][0] !== 'empty' && data[i][j][0] !== 'hidden' && data[i][j][1] === 1) {
                             switch (data[i][j][0]) {
                                 case '4-1':
-                                    this.ship41.push(data[i][j][0])
-                                    this.score++
+                                    this.ship41.push(data[i][j][0]);
+                                    this.score++;
                                     break;
                                 case '3-1':
-                                    this.ship31.push(data[i][j][0])
-                                    this.score++
+                                    this.ship31.push(data[i][j][0]);
+                                    this.score++;
                                     break;
                                 case '3-2':
-                                    this.ship32.push(data[i][j][0])
-                                    this.score++
+                                    this.ship32.push(data[i][j][0]);
+                                    this.score++;
                                     break;
                                 case '2-1':
-                                    this.ship21.push(data[i][j][0])
-                                    this.score++
+                                    this.ship21.push(data[i][j][0]);
+                                    this.score++;
                                     break;
                                 case '2-2':
-                                    this.ship22.push(data[i][j][0])
-                                    this.score++
+                                    this.ship22.push(data[i][j][0]);
+                                    this.score++;
                                     break;
                                 case '2-3':
-                                    this.ship23.push(data[i][j][0])
-                                    this.score++
+                                    this.ship23.push(data[i][j][0]);
+                                    this.score++;
                                     break;
                                 case '1-1':
-                                    this.ship11.push(data[i][j][0])
-                                    this.score++
+                                    this.ship11.push(data[i][j][0]);
+                                    this.score++;
                                     break;
                                 case '1-2':
-                                    this.ship12.push(data[i][j][0])
-                                    this.score++
+                                    this.ship12.push(data[i][j][0]);
+                                    this.score++;
                                     break;
                                 case '1-3':
-                                    this.ship13.push(data[i][j][0])
-                                    this.score++
+                                    this.ship13.push(data[i][j][0]);
+                                    this.score++;
                                     break;
                                 case '1-4':
-                                    this.ship14.push(data[i][j][0])
-                                    this.score++
+                                    this.ship14.push(data[i][j][0]);
+                                    this.score++;
                                     break;
                             }
                         }

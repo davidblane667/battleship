@@ -45,6 +45,7 @@
         min-height: 100vh;
         position: relative;
         overflow-x: hidden;
+        overflow-y: hidden;
     }
 
     .container {
@@ -73,8 +74,12 @@
         from {
             background-position: 0 0;
         }
-        to {
+        50% {
             background-position: -100% 0;
+
+        }
+        to {
+            background-position: 0 0;
         }
     }
 </style>

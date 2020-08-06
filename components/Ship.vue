@@ -12,11 +12,6 @@
     import {Drag, Drop} from 'vue-drag-drop';
 
     export default {
-        data() {
-            return {
-                id: '',
-            }
-        },
         components: {
             Drop,
             Drag
@@ -25,6 +20,11 @@
             'shipLength',
             'shipNumber'
         ],
+        data() {
+            return {
+                id: '',
+            }
+        },
         mounted() {
             this.id = 'ship' + this.shipLength + '-' + this.shipNumber
         },

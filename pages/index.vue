@@ -1,6 +1,6 @@
 <template>
     <div class="content">
-        <a @click.prevent="setStartData" href="#" class="btn">— Для начала, расставь корабли, каналья!</a>
+        <a @click.prevent="setStartData" href="javascript:void(0)" class="btn">— Для начала, расставь корабли, каналья!</a>
         <div class="content-left">
             <Ship :shipLength="4" :shipNumber="1"/>
 
@@ -24,7 +24,7 @@
 
 <script>
     import Ship from '@/components/Ship'
-    import Battleground from '@/components/battleground/Battleground'
+    import Battleground from '@/components/battleground/index'
 
     export default {
         components: {

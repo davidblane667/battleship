@@ -25,6 +25,8 @@ export default {
             { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&display=swap' }
         ]
     },
+
+    baseURL: 'http://battleships.dev.sibirix.ru',
     /*
     ** Global CSS
     */

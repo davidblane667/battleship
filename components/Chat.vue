@@ -9,14 +9,14 @@
             </div>
         </div>
         <div class="controls">
-            <input type="text" placeholder="Написать в чат" v-model="message">
+            <input type="text" placeholder="Написать в чат" v-model="message" v-on:keyup.enter="sendMessage">
             <button type="submit" @click="sendMessage">Отправить</button>
         </div>
     </div>
 </template>
 
 <script>
-    import axios from 'axios'
+    import config from '../nuxt.config.js'
 
     export default {
         data() {
@@ -32,7 +32,7 @@
         methods: {
             async getMessage() {
                 const {id, code} = this.$route.params;
-                const {lastTime, messages, success} = await this.$axios.$get(`http://battleships.dev.sibirix.ru/api/chat-load/${id}/${code}?lastTime=${this.lastTime}`);
+                const {lastTime, messages, success} = await this.$axios.$get(`${config.baseURL}/api/chat-load/${id}/${code}?lastTime=${this.lastTime}`);
 
                 this.messages = messages;
                 this.lastTime = lastTime;
@@ -40,32 +40,30 @@
                 if (success) {
                     setInterval(() => {
                         this.getIntervalMessage()
-                    }, 5000)
+                    }, 7000)
                 }
             },
             async getIntervalMessage() {
                 const {id, code} = this.$route.params;
-                const {lastTime, messages, success} = await this.$axios.$get(`http://battleships.dev.sibirix.ru/api/chat-load/${id}/${code}?lastTime=${this.lastTime}`);
+                const {lastTime, messages, success} = await this.$axios.$get(`${config.baseURL}/api/chat-load/${id}/${code}?lastTime=${this.lastTime}`);
 
-                if (messages.length > 0) {
-                    for (let mess of messages) {
-                        this.messages.unshift(mess)
-                    }
+                for (let mess of messages) {
+                    this.messages.unshift(mess)
                 }
                 this.lastTime = lastTime
             },
             async sendMessage() {
                 if (this.message.replace(/\s/g, '').length > 0) {
                     const {id, code} = this.$route.params;
-                    const str = new FormData();
+                    const objData = new FormData();
 
-                    str.set('message', this.message);
+                    objData.set('message', this.message);
                     this.message = '';
 
                     const response = await this.$axios({
                         method: 'post',
-                        url: `http://battleships.dev.sibirix.ru/api/chat-send/${id}/${code}`,
-                        data: str,
+                        url: `${config.baseURL}/api/chat-send/${id}/${code}`,
+                        data: objData,
                         headers: {'Content-Type': 'multipart/form-data'}
                     })
 

@@ -1,23 +1,30 @@
 <template>
-    <div :id="`${x}${y}`" class="cell transparent"
-         v-if="$route.path.indexOf('battle') !== -1 && y === 0 && myField"></div>
-    <div :id="`${x}${y}`" class="cell" v-else-if="$route.path.indexOf('battle') !== -1 && myField"></div>
-    <div @click="shotHandle({x, y})" @mouseout="outCell({x: x, y: y})" @mouseover="enterCell({x: x, y: y})"
-         :id="`enemy${x}${y}`" class="battle-cell cell transparent"
-         v-else-if="$route.path.indexOf('battle') !== -1 && y === 0">
-        <span class="select-cords">{{`${words[y]}${x + 1} - Пли!`}}</span>
+    <div v-if="isBattleMy"
+         class="cell"
+         :id="`${x}${y}`"
+         :class="variableCellClass"
+    ></div>
+    <div v-else-if="isBattle"
+         class="battle-cell cell"
+         :id="`enemy${x}${y}`"
+         :class="variableCellClass"
+         @click="shotHandle({x, y})"
+         @mouseout="outCell({x: x, y: y})"
+         @mouseover="enterCell({x: x, y: y})"
+    >
+        <span class="select-cords">{{`${letters[y]}${x + 1} - Пли!`}}</span>
     </div>
-    <div @click="shotHandle({x, y})" @mouseout="outCell({x: x, y: y})" @mouseover="enterCell({x: x, y: y})"
-         :id="`enemy${x}${y}`" class="battle-cell cell" v-else-if="$route.path.indexOf('battle') !== -1">
-        <span class="select-cords">{{`${words[y]}${x + 1} - Пли!`}}</span>
-    </div>
-    <drop @drop="handleDrop" :id="`${x}${y}`" class="drop cell transparent" v-else-if="y === 0"
-          :class="{close: cell.isShip}"></drop>
-    <drop @drop="handleDrop" :id="`${x}${y}`" class="drop cell" v-else :class="{close: cell.isShip}"></drop>
+    <drop v-else
+          class="drop cell"
+          :id="`${x}${y}`"
+          :class="{close: cell.isShip}"
+          @drop="handleDrop"
+    ></drop>
 </template>
 
 <script>
     import {Drag, Drop} from 'vue-drag-drop';
+    import config from '../../nuxt.config.js'
 
     export default {
         components: {
@@ -35,7 +42,16 @@
                 shipLength: null,
                 orientation: false,
                 shipCurrentId: null,
-                words: ['А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ж', 'З', 'И', 'К']
+                letters: ['А', 'Б', 'В', 'Г', 'Д', 'Е', 'Ж', 'З', 'И', 'К'],
+                variableCellClass: ''
+            }
+        },
+        computed: {
+            isBattleMy() {
+                return this.$route.path.indexOf('battle') !== -1 && this.myField
+            },
+            isBattle() {
+                return this.$route.path.indexOf('battle') !== -1
             }
         },
         methods: {
@@ -140,16 +156,16 @@
             },
             async placeShip(ship) {
                 const {id, code} = this.$route.params;
-                const str = new FormData();
-                str.set('x', ship.x);
-                str.set('y', ship.y);
-                str.set('ship', ship.ship);
-                str.set('orientation', ship.orientation);
+                const objData = new FormData();
+                objData.set('x', ship.x);
+                objData.set('y', ship.y);
+                objData.set('ship', ship.ship);
+                objData.set('orientation', ship.orientation);
 
                 const {data: {success}} = await this.$axios({
                     method: 'post',
-                    url: `http://battleships.dev.sibirix.ru/api/place-ship/${id}/${code}`,
-                    data: str,
+                    url: `${config.baseURL}/api/place-ship/${id}/${code}`,
+                    data: objData,
                     headers: {'Content-Type': 'multipart/form-data'}
                 });
                 if (success) {
@@ -265,23 +281,20 @@
 
                 if (turn) {
                     const {id, code} = this.$route.params;
-                    const str = new FormData();
-                    str.set('x', y);
-                    str.set('y', x);
+                    const objData = new FormData();
+                    objData.set('x', y);
+                    objData.set('y', x);
 
                     const {data} = await this.$axios({
                         method: 'post',
-                        url: `http://battleships.dev.sibirix.ru/api/shot/${id}/${code}`,
-                        data: str,
+                        url: `${config.baseURL}/api/shot/${id}/${code}`,
+                        data: objData,
                         headers: {'Content-Type': 'multipart/form-data'}
                     });
-                    const cell = document.getElementById(`enemy${x}${y}`);
-                    if (data.hit && data.success && data.kill) {
-                        cell.classList.add('shot-kill')
-                    } else if (data.hit && data.success) {
-                        cell.classList.add('shot')
+                    if (data.hit && data.success) {
+                        this.variableCellClass = 'shot'
                     } else if (!data.hit && data.success) {
-                        cell.classList.add('shot-miss')
+                        this.variableCellClass = 'shot-miss'
                     } else if (!data.success) {
                         alert('Вы сюда уже стреляли!')
                     }
@@ -298,10 +311,10 @@
     .cell {
         width: 100%;
         border-left: 1px solid rgba(255, 255, 255, .46);
-    }
 
-    .transparent {
-        border-left: 1px solid transparent;
+        &:first-child {
+            border-left: 1px solid transparent;
+        }
     }
 
     .drop {
@@ -327,23 +340,6 @@
             content: '';
             position: absolute;
             background-image: url(../../assets/img/shot.png);
-            background-size: cover;
-            width: 71px;
-            height: 90px;
-            top: -44px;
-            left: -36px;
-            transform: rotateZ(-45deg) rotateY(-54deg);
-        }
-    }
-
-    .shot-kill {
-        position: relative;
-        background-color: #000;
-
-        &:after {
-            content: '';
-            position: absolute;
-            background: url(../../assets/img/shot.png);
             background-size: cover;
             width: 71px;
             height: 90px;
@@ -400,6 +396,7 @@
         font-size: 25px;
         padding: 2px 5px;
         transform: rotateZ(-45deg) rotateY(-54deg);
+        pointer-events: none;
     }
 
 
